@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
@@ -11,6 +12,7 @@ import java.time.Duration;
 
 @Validated
 @ConfigurationProperties(prefix = "app")
+@Data
 public class AppProperties {
 
     @NotBlank
@@ -28,79 +30,40 @@ public class AppProperties {
 
     private final Jwt jwt = new Jwt();
     private final RateLimit rateLimit = new RateLimit();
+    private final Groq groq = new Groq();
+    private final Embedding embedding = new Embedding();
+    private final Transcription transcription = new Transcription();
 
-    public String getStoragePath() {
-        return storagePath;
-    }
-
-    public void setStoragePath(String storagePath) {
-        this.storagePath = storagePath;
-    }
-
-    public Long getMaxFileSizeBytes() {
-        return maxFileSizeBytes;
-    }
-
-    public void setMaxFileSizeBytes(Long maxFileSizeBytes) {
-        this.maxFileSizeBytes = maxFileSizeBytes;
-    }
-
-    public int getChunkSizeTokens() {
-        return chunkSizeTokens;
-    }
-
-    public void setChunkSizeTokens(int chunkSizeTokens) {
-        this.chunkSizeTokens = chunkSizeTokens;
-    }
-
-    public int getChunkOverlapTokens() {
-        return chunkOverlapTokens;
-    }
-
-    public void setChunkOverlapTokens(int chunkOverlapTokens) {
-        this.chunkOverlapTokens = chunkOverlapTokens;
-    }
-
-    public Jwt getJwt() {
-        return jwt;
-    }
-
-    public RateLimit getRateLimit() {
-        return rateLimit;
-    }
-
+    @Data
     public static class Jwt {
         @NotBlank
         private String secret;
         private Duration expiration = Duration.ofHours(24);
 
-        public String getSecret() {
-            return secret;
-        }
-
-        public void setSecret(String secret) {
-            this.secret = secret;
-        }
-
-        public Duration getExpiration() {
-            return expiration;
-        }
-
-        public void setExpiration(Duration expiration) {
-            this.expiration = expiration;
-        }
     }
 
+    @Data
     public static class RateLimit {
         @Min(1)
         private long requestsPerMinute = 60;
-
-        public long getRequestsPerMinute() {
-            return requestsPerMinute;
-        }
-
-        public void setRequestsPerMinute(long requestsPerMinute) {
-            this.requestsPerMinute = requestsPerMinute;
-        }
+    }
+    @Data
+    public static class Groq {
+        @NotBlank
+        private String baseUrl;
+        @NotBlank
+        private String apiKey;
+        @NotBlank
+        private String model;
+    }
+    @Data
+    public static class Embedding {
+        @NotBlank
+        private String url;
+    }
+    @Data
+    public static class Transcription {
+        @NotBlank
+        private String url;
     }
 }
