@@ -7,11 +7,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.serializer.JacksonJsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import java.time.Duration;
+import java.util.List;
 
 @Configuration
 @EnableCaching
@@ -19,8 +21,7 @@ public class RedisConfig {
 
     @Bean
     public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
-
-        RedisSerializationContext.SerializationPair<Object> valueSerializer =
+        RedisSerializationContext.SerializationPair<Object> defaultValueSerializer =
                 RedisSerializationContext.SerializationPair.fromSerializer(
                         RedisSerializer.json()
                 );
@@ -30,20 +31,29 @@ public class RedisConfig {
                         new StringRedisSerializer()
                 );
 
-        RedisCacheConfiguration defaultConfig =
+        RedisSerializationContext.SerializationPair<List> embeddingValueSerializer =
+                RedisSerializationContext.SerializationPair.fromSerializer(
+                        new JacksonJsonRedisSerializer<>(List.class)
+                );
+
+        RedisCacheConfiguration baseConfig =
                 RedisCacheConfiguration.defaultCacheConfig()
                         .entryTtl(Duration.ofMinutes(30))
                         .serializeKeysWith(keySerializer)
-                        .serializeValuesWith(valueSerializer);
+                        .serializeValuesWith(defaultValueSerializer);
 
         return RedisCacheManager.builder(connectionFactory)
-                .cacheDefaults(defaultConfig)
+                .cacheDefaults(baseConfig)
                 .withCacheConfiguration("summary",
-                        defaultConfig.entryTtl(Duration.ofHours(6)))
+                        baseConfig
+                                .entryTtl(Duration.ofHours(6)))
                 .withCacheConfiguration("faq",
-                        defaultConfig.entryTtl(Duration.ofHours(2)))
+                        baseConfig
+                                .entryTtl(Duration.ofHours(2)))
                 .withCacheConfiguration("embeddings",
-                        defaultConfig.entryTtl(Duration.ofHours(12)))
+                        baseConfig
+                                .serializeValuesWith(embeddingValueSerializer)
+                                .entryTtl(Duration.ofHours(12)))
                 .build();
     }
 }
