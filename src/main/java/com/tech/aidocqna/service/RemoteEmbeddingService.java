@@ -25,7 +25,9 @@ public class RemoteEmbeddingService implements EmbeddingService {
     @Override
     @Cacheable(cacheNames = "embeddings", key = "#text")
     public List<Double> generateEmbedding(String text) {
+        log.info("Generating embedding for text");
         if (text == null || text.isBlank()) {
+            log.warn("Empty text for embedding");
             throw new BadRequestException("Text for embedding must not be empty");
         }
 
@@ -39,14 +41,17 @@ public class RemoteEmbeddingService implements EmbeddingService {
                 .block();
 
             if (response == null || response.get("embedding") == null) {
+                log.warn("Empty embedding response");
                 throw new ExternalServiceException("Embedding response is empty");
             }
 
             List<Number> raw = (List<Number>) response.get("embedding");
             if (raw.isEmpty()) {
+                log.warn("Empty embedding vector");
                 throw new ExternalServiceException("Embedding vector missing");
             }
 
+            log.info("Generated embedding for text");
             return raw.stream().map(Number::doubleValue).toList();
         } catch (WebClientResponseException ex) {
             log.error("Embedding service returned status {}", ex.getStatusCode().value(), ex);

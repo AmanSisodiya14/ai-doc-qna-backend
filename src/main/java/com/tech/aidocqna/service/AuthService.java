@@ -9,6 +9,7 @@ import com.tech.aidocqna.model.Role;
 import com.tech.aidocqna.model.User;
 import com.tech.aidocqna.repository.UserRepository;
 import com.tech.aidocqna.security.JwtService;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,30 +19,29 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Slf4j
 public class AuthService {
 
-    private static final Logger log = LoggerFactory.getLogger(AuthService.class);
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
-    private final AuditService auditService;
 
     public AuthService(
         UserRepository userRepository,
         PasswordEncoder passwordEncoder,
-        JwtService jwtService,
-        AuditService auditService
+        JwtService jwtService
     ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
-        this.auditService = auditService;
     }
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
+        log.info("Registering new user {}", request.getEmail());
         if (userRepository.existsByEmail(request.getEmail())) {
+            log.warn("Email {} already registered", request.getEmail());
             throw new BadRequestException("Email already registered");
         }
         User user = new User();
@@ -51,21 +51,21 @@ public class AuthService {
         user.setRole(Role.USER);
         User saved = userRepository.save(user);
         String token = jwtService.generateToken(saved);
-        auditService.logEvent("USER_REGISTERED", saved.getEmail(), "registration successful");
         log.info("Registered new user {}", saved.getEmail());
         return new AuthResponse(saved.getId(), saved.getName(), saved.getEmail(), token);
     }
 
     public AuthResponse login(LoginRequest request) {
-
+        log.info("User {} is attempting to login", request.getEmail());
         User user = userRepository.findByEmail(request.getEmail())
             .orElseThrow(() -> new UnauthorizedException("Invalid credentials"));
         // 🔥 Password validation
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            log.warn("Invalid password for user {}", request.getEmail());
             throw new UnauthorizedException("Invalid credentials");
         }
         String token = jwtService.generateToken(user);
-        auditService.logEvent("USER_LOGIN", user.getEmail(), "login successful");
+        log.info("User {} logged in successfully", user.getEmail());
         return new AuthResponse(user.getId(), user.getName(), user.getEmail(), token);
     }
 }

@@ -32,6 +32,7 @@ public class RemoteTranscriptionService implements TranscriptionService {
 
     @Override
     public TranscriptionResult transcribe(File file) {
+        log.info("Transcribing file");
         try {
             MultipartBodyBuilder builder = new MultipartBodyBuilder();
             builder.part("file", new FileSystemResource(file));
@@ -45,6 +46,7 @@ public class RemoteTranscriptionService implements TranscriptionService {
                 .block();
 
             if (response == null) {
+                log.warn("Transcription response is empty");
                 throw new ExternalServiceException("Transcription response is empty");
             }
 
@@ -63,6 +65,7 @@ public class RemoteTranscriptionService implements TranscriptionService {
                 .collect(Collectors.joining(" "))
                 .trim();
 
+            log.info("Transcribed file");
             return new TranscriptionResult(fullText, segments);
         } catch (WebClientResponseException ex) {
             log.error("Failed to call transcription service", ex);

@@ -3,6 +3,7 @@ package com.tech.aidocqna.service;
 import com.tech.aidocqna.model.Chunk;
 import com.tech.aidocqna.model.StoredFile;
 import com.tech.aidocqna.utils.TokenEstimator;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +13,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
+
 public class SummaryService {
 
     private static final int SMALL_DOC_TOKEN_THRESHOLD = 3500;
@@ -19,16 +22,15 @@ public class SummaryService {
 
     private final FileService fileService;
     private final LLMService llmService;
-    private final AuditService auditService;
 
-    public SummaryService(FileService fileService, LLMService llmService, AuditService auditService) {
+    public SummaryService(FileService fileService, LLMService llmService) {
         this.fileService = fileService;
         this.llmService = llmService;
-        this.auditService = auditService;
     }
 
     @Cacheable(cacheNames = "summary", key = "#fileId.toString()")
     public String summarize(String userEmail, Long fileId) {
+        log.info("User {} is generating a summary for file {}", userEmail, fileId);
         StoredFile file = fileService.getUserFile(fileId, userEmail);
         List<Chunk> chunks = fileService.getChunks(file.getId());
         String content = chunks.stream().map(Chunk::getContent).collect(Collectors.joining("\n"));
@@ -38,7 +40,7 @@ public class SummaryService {
             ? llmService.generateSummary(content)
             : hierarchicalSummary(chunks);
 
-        auditService.logEvent("FILE_SUMMARY", userEmail, "fileId=" + fileId);
+        log.info("Generated summary for file {}", fileId);
         return summary;
     }
 

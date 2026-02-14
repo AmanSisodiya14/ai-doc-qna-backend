@@ -4,6 +4,7 @@ import com.tech.aidocqna.config.AppProperties;
 import com.tech.aidocqna.dto.internal.ChunkPayload;
 import com.tech.aidocqna.dto.internal.TranscriptionSegment;
 import com.tech.aidocqna.utils.TokenEstimator;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.StringJoiner;
 
 @Service
+@Slf4j
 public class ChunkingService {
 
     private final AppProperties appProperties;
@@ -20,6 +22,7 @@ public class ChunkingService {
     }
 
     public List<ChunkPayload> chunkPlainText(String text) {
+        log.debug("Chunking plain text");
         String normalized = text == null ? "" : text.trim();
         if (normalized.isBlank()) {
             return List.of();
@@ -42,10 +45,12 @@ public class ChunkingService {
                 break;
             }
         }
+        log.debug("Chunked plain text into {} chunks", chunks.size());
         return chunks;
     }
 
     public List<ChunkPayload> chunkTranscription(List<TranscriptionSegment> segments) {
+        log.debug("Chunking transcription");
         if (segments == null || segments.isEmpty()) {
             return List.of();
         }
@@ -83,6 +88,7 @@ public class ChunkingService {
         if (!builder.toString().isBlank()) {
             chunks.add(new ChunkPayload(builder.toString().trim(), currentStart, currentEnd));
         }
+        log.debug("Chunked transcription into {} chunks", chunks.size());
         return chunks;
     }
 }

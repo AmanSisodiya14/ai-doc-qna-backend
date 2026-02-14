@@ -12,6 +12,7 @@ import com.tech.aidocqna.model.User;
 import com.tech.aidocqna.repository.ChunkRepository;
 import com.tech.aidocqna.repository.StoredFileRepository;
 import com.tech.aidocqna.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -28,6 +29,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@Slf4j
 public class FileService {
 
     private static final Logger log = LoggerFactory.getLogger(FileService.class);
@@ -41,7 +43,6 @@ public class FileService {
     private final ChunkingService chunkingService;
     private final EmbeddingService embeddingService;
     private final VectorSearchService vectorSearchService;
-    private final AuditService auditService;
 
     public FileService(
         UserRepository userRepository,
@@ -52,8 +53,7 @@ public class FileService {
         TranscriptionService transcriptionService,
         ChunkingService chunkingService,
         EmbeddingService embeddingService,
-        VectorSearchService vectorSearchService,
-        AuditService auditService
+        VectorSearchService vectorSearchService
     ) {
         this.userRepository = userRepository;
         this.storedFileRepository = storedFileRepository;
@@ -64,11 +64,12 @@ public class FileService {
         this.chunkingService = chunkingService;
         this.embeddingService = embeddingService;
         this.vectorSearchService = vectorSearchService;
-        this.auditService = auditService;
+
     }
 
     @Transactional
     public FileUploadResponse upload(String userEmail, MultipartFile multipartFile) {
+        log.info("User {} is uploading a file", userEmail);
         User user = userRepository.findByEmail(userEmail)
             .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         Path storedPath = fileStorageService.store(multipartFile);
@@ -95,7 +96,6 @@ public class FileService {
         StoredFile saved = storedFileRepository.save(file);
         List<Chunk> chunks = persistChunks(saved, chunkPayloads);
         vectorSearchService.indexFile(saved.getId(), chunks);
-        auditService.logEvent("FILE_UPLOADED", userEmail, "fileId=" + saved.getId());
         log.info("Uploaded file {} with {} chunks", saved.getId(), chunks.size());
 
         return new FileUploadResponse(saved.getId(), saved.getFileName(), saved.getFileType(), "PROCESSED");
@@ -119,17 +119,21 @@ public class FileService {
     }
 
     public TimestampSearchResponse findBestTimestamp(String userEmail, Long fileId, String query) {
+        log.info("User {} is searching for best timestamp for file {} with query {}", userEmail, fileId, query);
         getUserFile(fileId, userEmail);
         List<Double> queryEmbedding = embeddingService.generateEmbedding(query);
         List<VectorStoreService.ScoredChunk> matches = vectorSearchService.searchTopK(fileId, queryEmbedding, 1);
         if (matches.isEmpty()) {
+            log.warn("No matching chunk found for file {} with query {}", fileId, query);
             throw new ResourceNotFoundException("No matching chunk found for query");
         }
         Chunk best = matches.get(0).chunk();
+        log.info("Found best timestamp for file {} with query {}", fileId, query);
         return new TimestampSearchResponse(best.getStartTime(), best.getEndTime(), best.getContent());
     }
 
     private List<Chunk> persistChunks(StoredFile file, List<ChunkPayload> chunkPayloads) {
+        log.info("Persisting {} chunks for file {}", chunkPayloads.size(), file.getId());
         List<Chunk> chunks = new ArrayList<>();
         for (int i = 0; i < chunkPayloads.size(); i++) {
             ChunkPayload payload = chunkPayloads.get(i);
@@ -142,6 +146,8 @@ public class FileService {
             chunk.setEmbedding(embeddingService.generateEmbedding(payload.getContent()));
             chunks.add(chunk);
         }
+        log.info("Persisted {} chunks for file {}", chunks.size(), file.getId());
+
         return chunkRepository.saveAll(chunks);
     }
 }

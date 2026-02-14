@@ -40,6 +40,7 @@ public class GroqLLMService implements LLMService {
     }
 
     private String generateCompletion(String systemPrompt, String userPrompt) {
+        log.info("Generating completion ");
         Map<String, Object> request = Map.of(
             "model", appProperties.getGroq().getModel(),
             "messages", List.of(
@@ -58,19 +59,23 @@ public class GroqLLMService implements LLMService {
                 .block();
 
             if (response == null) {
+                log.warn("Groq response is empty");
                 throw new ExternalServiceException("Groq response is empty");
             }
 
             List<Map<String, Object>> choices = (List<Map<String, Object>>) response.get("choices");
             if (choices == null || choices.isEmpty()) {
+                log.warn("Groq response choices missing");
                 throw new ExternalServiceException("Groq response choices missing");
             }
 
             Map<String, Object> message = (Map<String, Object>) choices.get(0).get("message");
             String content = message == null ? null : Objects.toString(message.get("content"), null);
             if (content == null || content.isBlank()) {
+                log.warn("Groq response content missing");
                 throw new ExternalServiceException("Groq response content missing");
             }
+            log.info("Generated completion");
             return content.trim();
         } catch (WebClientResponseException ex) {
             log.error("Groq error body: {}", ex.getResponseBodyAsString());
@@ -81,8 +86,10 @@ public class GroqLLMService implements LLMService {
             );
         }
         catch (ExternalServiceException ex) {
+            log.error("External service error", ex);
             throw ex;
         } catch (Exception ex) {
+            log.error("Failed to call Groq chat completion API", ex);
             throw new ExternalServiceException("Failed to call Groq chat completion API", ex);
         }
     }
