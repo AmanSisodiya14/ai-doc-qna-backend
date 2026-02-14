@@ -64,7 +64,7 @@ public class FileController {
     }
 
     @GetMapping("/{fileId}/summary")
-    public ResponseEntity<ApiResponse<FileSummaryResponse>> summary(@PathVariable UUID fileId) {
+    public ResponseEntity<ApiResponse<FileSummaryResponse>> summary(@PathVariable Long fileId) {
 
         String email = UserContext.get().getEmail();
         String summary = summaryService.summarize(email, fileId);
@@ -73,7 +73,7 @@ public class FileController {
 
     @GetMapping("/{fileId}/timestamps")
     public ResponseEntity<ApiResponse<TimestampSearchResponse>> timestamps(
-        @PathVariable UUID fileId,
+        @PathVariable Long fileId,
         @RequestParam @NotBlank String query
     ) {String email = UserContext.get().getEmail();
         TimestampSearchResponse response = fileService.findBestTimestamp(email, fileId, query);

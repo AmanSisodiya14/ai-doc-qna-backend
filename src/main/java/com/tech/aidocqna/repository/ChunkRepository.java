@@ -7,6 +7,6 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ChunkRepository extends JpaRepository<Chunk, UUID> {
-    List<Chunk> findByFileIdOrderByChunkOrderAsc(UUID fileId);
-    void deleteByFileId(UUID fileId);
+    List<Chunk> findByFileIdOrderByChunkOrderAsc(Long fileId);
+    void deleteByFileId(Long fileId);
 }

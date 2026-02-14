@@ -28,7 +28,7 @@ public class SummaryService {
     }
 
     @Cacheable(cacheNames = "summary", key = "#fileId.toString()")
-    public String summarize(String userEmail, UUID fileId) {
+    public String summarize(String userEmail, Long fileId) {
         StoredFile file = fileService.getUserFile(fileId, userEmail);
         List<Chunk> chunks = fileService.getChunks(file.getId());
         String content = chunks.stream().map(Chunk::getContent).collect(Collectors.joining("\n"));

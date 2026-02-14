@@ -38,7 +38,7 @@ public class ChatService {
     }
 
     @Cacheable(cacheNames = "faq", key = "#fileId.toString() + ':' + #question")
-    public ChatResponse ask(String userEmail, UUID fileId, String question) {
+    public ChatResponse ask(String userEmail, Long fileId, String question) {
         StoredFile file = fileService.getUserFile(fileId, userEmail);
         List<Double> questionEmbedding = embeddingService.generateEmbedding(question);
         List<VectorStoreService.ScoredChunk> topChunks = vectorSearchService.searchTopK(file.getId(), questionEmbedding, 3);
@@ -58,7 +58,7 @@ public class ChatService {
         return new ChatResponse(answer, bestChunk.getStartTime(), confidence);
     }
 
-    public SseEmitter streamAnswer(String userEmail, UUID fileId, String question) {
+    public SseEmitter streamAnswer(String userEmail, Long fileId, String question) {
         SseEmitter emitter = new SseEmitter(30000L);
         CompletableFuture.runAsync(() -> {
             try {

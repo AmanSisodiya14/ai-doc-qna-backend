@@ -18,11 +18,11 @@ public class VectorSearchService {
         this.vectorStoreService = vectorStoreService;
     }
 
-    public void indexFile(UUID fileId, List<Chunk> chunks) {
+    public void indexFile(Long fileId, List<Chunk> chunks) {
         vectorStoreService.indexChunks(fileId, chunks);
     }
 
-    public List<VectorStoreService.ScoredChunk> searchTopK(UUID fileId, List<Double> queryEmbedding, int topK) {
+    public List<VectorStoreService.ScoredChunk> searchTopK(Long fileId, List<Double> queryEmbedding, int topK) {
         List<VectorStoreService.ScoredChunk> cached = vectorStoreService.search(fileId, queryEmbedding, topK);
         if (!cached.isEmpty()) {
             return cached;

@@ -7,7 +7,8 @@ import lombok.*;
 @NoArgsConstructor
 public class AuthResponse {
 
-    private UUID userId;
+    private Long userId;
+    private String name;
     private String email;
     private String token;
 }

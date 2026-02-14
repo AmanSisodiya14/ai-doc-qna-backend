@@ -109,16 +109,16 @@ public class FileService {
             .map(file -> new FileMetadataResponse(file.getId(), file.getFileName(), file.getFileType(), file.getUploadDate()));
     }
 
-    public StoredFile getUserFile(UUID fileId, String userEmail) {
+    public StoredFile getUserFile(Long fileId, String userEmail) {
         return storedFileRepository.findByIdAndUserEmail(fileId, userEmail)
             .orElseThrow(() -> new ResourceNotFoundException("File not found"));
     }
 
-    public List<Chunk> getChunks(UUID fileId) {
+    public List<Chunk> getChunks(Long fileId) {
         return chunkRepository.findByFileIdOrderByChunkOrderAsc(fileId);
     }
 
-    public TimestampSearchResponse findBestTimestamp(String userEmail, UUID fileId, String query) {
+    public TimestampSearchResponse findBestTimestamp(String userEmail, Long fileId, String query) {
         getUserFile(fileId, userEmail);
         List<Double> queryEmbedding = embeddingService.generateEmbedding(query);
         List<VectorStoreService.ScoredChunk> matches = vectorSearchService.searchTopK(fileId, queryEmbedding, 1);

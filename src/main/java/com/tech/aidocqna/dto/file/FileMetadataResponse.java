@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 
 public class FileMetadataResponse {
-    private UUID fileId;
+    private Long fileId;
     private String fileName;
     private String fileType;
     private Instant uploadDate;

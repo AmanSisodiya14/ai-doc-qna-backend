@@ -47,12 +47,13 @@ public class AuthService {
         User user = new User();
         user.setEmail(request.getEmail().toLowerCase().trim());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setName(request.getName());
         user.setRole(Role.USER);
         User saved = userRepository.save(user);
         String token = jwtService.generateToken(saved);
         auditService.logEvent("USER_REGISTERED", saved.getEmail(), "registration successful");
         log.info("Registered new user {}", saved.getEmail());
-        return new AuthResponse(saved.getId(), saved.getEmail(), token);
+        return new AuthResponse(saved.getId(), saved.getName(), saved.getEmail(), token);
     }
 
     public AuthResponse login(LoginRequest request) {
@@ -65,6 +66,6 @@ public class AuthService {
         }
         String token = jwtService.generateToken(user);
         auditService.logEvent("USER_LOGIN", user.getEmail(), "login successful");
-        return new AuthResponse(user.getId(), user.getEmail(), token);
+        return new AuthResponse(user.getId(), user.getName(), user.getEmail(), token);
     }
 }

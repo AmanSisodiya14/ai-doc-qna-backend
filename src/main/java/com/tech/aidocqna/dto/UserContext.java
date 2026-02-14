@@ -8,7 +8,7 @@ import lombok.Data;
 public class UserContext {
 
     private static final ThreadLocal<UserContext> CONTEXT = new ThreadLocal<>();
-
+    private String name;
     private String email;
     private Role role;
 

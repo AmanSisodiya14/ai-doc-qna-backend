@@ -39,7 +39,7 @@ public class ChatController {
     }
 
     @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter chatStream(@RequestParam UUID fileId, @RequestParam @NotBlank String question) {
+    public SseEmitter chatStream(@RequestParam Long fileId, @RequestParam @NotBlank String question) {
         String email = UserContext.get().getEmail();
         return chatService.streamAnswer(email, fileId, question);
     }

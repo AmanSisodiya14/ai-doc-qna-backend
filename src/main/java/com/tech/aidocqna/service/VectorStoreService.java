@@ -14,17 +14,17 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class VectorStoreService {
 
-    private final Map<UUID, List<Chunk>> fileIndex = new ConcurrentHashMap<>();
+    private final Map<Long, List<Chunk>> fileIndex = new ConcurrentHashMap<>();
 
-    public void indexChunks(UUID fileId, List<Chunk> chunks) {
+    public void indexChunks(Long fileId, List<Chunk> chunks) {
         fileIndex.put(fileId, new ArrayList<>(chunks));
     }
 
-    public void removeFile(UUID fileId) {
+    public void removeFile(Long fileId) {
         fileIndex.remove(fileId);
     }
 
-    public List<ScoredChunk> search(UUID fileId, List<Double> queryEmbedding, int topK) {
+    public List<ScoredChunk> search(Long fileId, List<Double> queryEmbedding, int topK) {
         List<Chunk> indexed = fileIndex.getOrDefault(fileId, List.of());
         return indexed.stream()
             .filter(chunk -> chunk.getEmbedding() != null && !chunk.getEmbedding().isEmpty())

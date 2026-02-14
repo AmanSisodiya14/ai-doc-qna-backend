@@ -10,8 +10,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface StoredFileRepository extends JpaRepository<StoredFile, UUID> {
-    Page<StoredFile> findByUserId(UUID userId, Pageable pageable);
+    Page<StoredFile> findByUserId(Long userId, Pageable pageable);
 
     @Query("SELECT f FROM StoredFile f WHERE f.id = :id AND f.user.email = :email")
-    Optional<StoredFile> findByIdAndUserEmail(UUID id, String email);
+    Optional<StoredFile> findByIdAndUserEmail(Long id, String email);
 }

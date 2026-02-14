@@ -8,7 +8,7 @@ import java.util.UUID;
 @Data
 public class ChatRequest {
     @NotNull
-    private UUID fileId;
+    private Long fileId;
     @NotBlank
     private String message;
 
