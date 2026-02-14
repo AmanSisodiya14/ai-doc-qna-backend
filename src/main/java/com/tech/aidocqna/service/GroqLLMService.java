@@ -1,6 +1,6 @@
 package com.tech.aidocqna.service;
 
-import com.tech.aidocqna.config.GroqProperties;
+import com.tech.aidocqna.config.AppProperties;
 import com.tech.aidocqna.exception.ExternalServiceException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -17,11 +17,11 @@ import java.util.Objects;
 public class GroqLLMService implements LLMService {
 
     private final WebClient groqWebClient;
-    private final GroqProperties groqProperties;
+    private final AppProperties appProperties;
 
-    public GroqLLMService(@Qualifier("groqWebClient") WebClient groqWebClient, GroqProperties groqProperties) {
+    public GroqLLMService(@Qualifier("groqWebClient") WebClient groqWebClient, AppProperties appProperties) {
         this.groqWebClient = groqWebClient;
-        this.groqProperties = groqProperties;
+        this.appProperties = appProperties;
     }
 
     @Override
@@ -41,7 +41,7 @@ public class GroqLLMService implements LLMService {
 
     private String generateCompletion(String systemPrompt, String userPrompt) {
         Map<String, Object> request = Map.of(
-            "model", groqProperties.getModel(),
+            "model", appProperties.getGroq().getModel(),
             "messages", List.of(
                 Map.of("role", "system", "content", systemPrompt),
                 Map.of("role", "user", "content", userPrompt)

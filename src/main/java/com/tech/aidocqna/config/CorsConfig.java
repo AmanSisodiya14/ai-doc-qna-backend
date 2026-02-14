@@ -24,18 +24,12 @@ public class CorsConfig {
 
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.setAllowCredentials(true);
-        corsConfiguration.setAllowedOriginPatterns(Arrays.asList("https://*.metasetu.live","http://localhost:5173","http://localhost:8081"));
+        corsConfiguration.setAllowedOriginPatterns(Arrays.asList("http://localhost:5173","http://localhost:8081"));
         corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         corsConfiguration.setAllowedHeaders(Arrays.asList(
-                "Origin", "Content-Type", "Accept", "Authorization",
-                "industryId", "tenantId", "customerId", "fleetId", "userId",
-                "customerType", "roleId", "email", "phoneNumber", "domain", "systemIndustryId","resource", "orgunittypeid", "orgunitid",
-                "driverId"
+                "Origin", "Content-Type", "Accept", "Authorization"
         ));
-        corsConfiguration.setExposedHeaders(Arrays.asList(
-                "industryId", "tenantId", "customerId", "fleetId", "userId",
-                "customerType", "roleId", "email", "phoneNumber", "domain", "orgunittypeid", "orgunitid","driverId"
-        ));
+
 
         corsConfiguration.addAllowedHeader("*");
         corsConfiguration.setMaxAge(3600L);

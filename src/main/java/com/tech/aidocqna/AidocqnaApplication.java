@@ -1,9 +1,6 @@
 package com.tech.aidocqna;
 
 import com.tech.aidocqna.config.AppProperties;
-import com.tech.aidocqna.config.EmbeddingProperties;
-import com.tech.aidocqna.config.GroqProperties;
-import com.tech.aidocqna.config.TranscriptionProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -14,10 +11,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @EnableCaching
 @EnableAsync
 @EnableConfigurationProperties({
-    AppProperties.class,
-    GroqProperties.class,
-    EmbeddingProperties.class,
-    TranscriptionProperties.class
+    AppProperties.class
 })
 public class AidocqnaApplication {
 

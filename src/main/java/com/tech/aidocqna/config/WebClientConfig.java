@@ -10,26 +10,26 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class WebClientConfig {
 
     @Bean("groqWebClient")
-    public WebClient groqWebClient(GroqProperties properties) {
+    public WebClient groqWebClient(AppProperties properties) {
         return WebClient.builder()
-            .baseUrl(properties.getBaseUrl())
-            .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + properties.getApiKey())
+            .baseUrl(properties.getGroq().getBaseUrl())
+            .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + properties.getGroq().getApiKey())
             .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
             .build();
     }
 
     @Bean("embeddingWebClient")
-    public WebClient embeddingWebClient(EmbeddingProperties properties) {
+    public WebClient embeddingWebClient(AppProperties properties) {
         return WebClient.builder()
-            .baseUrl(properties.getUrl())
+            .baseUrl(properties.getEmbedding().getUrl())
             .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
             .build();
     }
 
     @Bean("transcriptionWebClient")
-    public WebClient transcriptionWebClient(TranscriptionProperties properties) {
+    public WebClient transcriptionWebClient(AppProperties properties) {
         return WebClient.builder()
-            .baseUrl(properties.getUrl())
+            .baseUrl(properties.getTranscription().getUrl())
             .build();
     }
 }

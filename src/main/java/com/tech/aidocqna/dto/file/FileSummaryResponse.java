@@ -1,21 +1,14 @@
 package com.tech.aidocqna.dto.file;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class FileSummaryResponse {
 
     private String summary;
 
-    public FileSummaryResponse() {
-    }
-
-    public FileSummaryResponse(String summary) {
-        this.summary = summary;
-    }
-
-    public String getSummary() {
-        return summary;
-    }
-
-    public void setSummary(String summary) {
-        this.summary = summary;
-    }
 }
