@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -85,7 +86,7 @@ public class FileService {
             file.setExtractedText(text);
             chunkPayloads = chunkingService.chunkPlainText(text);
         } else {
-            TranscriptionResult transcription = transcriptionService.transcribeAsync(storedPath).join();
+            TranscriptionResult transcription = transcriptionService.transcribe(new File(storedPath.toString()));
             file.setTranscript(transcription.getText());
             file.setExtractedText(transcription.getText());
             chunkPayloads = chunkingService.chunkTranscription(transcription.getSegments());
@@ -119,7 +120,7 @@ public class FileService {
 
     public TimestampSearchResponse findBestTimestamp(String userEmail, UUID fileId, String query) {
         getUserFile(fileId, userEmail);
-        List<Double> queryEmbedding = embeddingService.embedText(query);
+        List<Double> queryEmbedding = embeddingService.generateEmbedding(query);
         List<VectorStoreService.ScoredChunk> matches = vectorSearchService.searchTopK(fileId, queryEmbedding, 1);
         if (matches.isEmpty()) {
             throw new ResourceNotFoundException("No matching chunk found for query");
@@ -129,32 +130,18 @@ public class FileService {
     }
 
     private List<Chunk> persistChunks(StoredFile file, List<ChunkPayload> chunkPayloads) {
-
-        // 1️⃣ Extract all chunk texts
-        List<String> contents = chunkPayloads.stream()
-                .map(ChunkPayload::getContent)
-                .toList();
-
-        // 2️⃣ Call OpenAI ONCE (batch embedding)
-        List<List<Double>> embeddings = embeddingService.embedText2(contents);
-
-        // 3️⃣ Build chunk entities
         List<Chunk> chunks = new ArrayList<>();
         for (int i = 0; i < chunkPayloads.size(); i++) {
             ChunkPayload payload = chunkPayloads.get(i);
-
             Chunk chunk = new Chunk();
             chunk.setFile(file);
             chunk.setContent(payload.getContent());
             chunk.setStartTime(payload.getStartTime());
             chunk.setEndTime(payload.getEndTime());
             chunk.setChunkOrder(i);
-            chunk.setEmbedding(embeddings.get(i));
-
+            chunk.setEmbedding(embeddingService.generateEmbedding(payload.getContent()));
             chunks.add(chunk);
         }
-
         return chunkRepository.saveAll(chunks);
     }
-
 }

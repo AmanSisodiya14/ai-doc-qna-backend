@@ -18,22 +18,14 @@ public class SummaryService {
     private static final int HIERARCHICAL_BATCH_SIZE = 6;
 
     private final FileService fileService;
-    // OpenAI Client Service (Commented out - using LlamaIndex.ai instead)
-     private final OpenAiClientService openAiClientService;
-//    private final LlamaIndexClientService llamaIndexClientService;
+    private final LLMService llmService;
     private final AuditService auditService;
 
-     public SummaryService(FileService fileService, OpenAiClientService openAiClientService, AuditService auditService) {
-         this.fileService = fileService;
-         this.openAiClientService = openAiClientService;
-         this.auditService = auditService;
-     }
-
-//    public SummaryService(FileService fileService, LlamaIndexClientService llamaIndexClientService, AuditService auditService) {
-//        this.fileService = fileService;
-//        this.llamaIndexClientService = llamaIndexClientService;
-//        this.auditService = auditService;
-//    }
+    public SummaryService(FileService fileService, LLMService llmService, AuditService auditService) {
+        this.fileService = fileService;
+        this.llmService = llmService;
+        this.auditService = auditService;
+    }
 
     @Cacheable(cacheNames = "summary", key = "#fileId.toString()")
     public String summarize(String userEmail, UUID fileId) {
@@ -41,21 +33,13 @@ public class SummaryService {
         List<Chunk> chunks = fileService.getChunks(file.getId());
         String content = chunks.stream().map(Chunk::getContent).collect(Collectors.joining("\n"));
         int tokens = TokenEstimator.estimateTokens(content);
-        String summary;
-        if (tokens <= SMALL_DOC_TOKEN_THRESHOLD) {
-            summary = summarizeBlock(content);
-        } else {
-            summary = hierarchicalSummary(chunks);
-        }
+
+        String summary = tokens <= SMALL_DOC_TOKEN_THRESHOLD
+            ? llmService.generateSummary(content)
+            : hierarchicalSummary(chunks);
+
         auditService.logEvent("FILE_SUMMARY", userEmail, "fileId=" + fileId);
         return summary;
-    }
-
-    private String summarizeBlock(String content) {
-        String system = "Summarize clearly in concise bullet points and one short conclusion.";
-        String user = "Summarize this content:\n" + content;
-         return openAiClientService.createChatCompletion(system, user);
-//        return llamaIndexClientService.createChatCompletion(system, user);
     }
 
     private String hierarchicalSummary(List<Chunk> chunks) {
@@ -65,9 +49,9 @@ public class SummaryService {
             String group = chunks.subList(i, end).stream()
                 .map(Chunk::getContent)
                 .collect(Collectors.joining("\n"));
-            firstPass.add(summarizeBlock(group));
+            firstPass.add(llmService.generateSummary(group));
         }
         String merged = String.join("\n", firstPass);
-        return summarizeBlock(merged);
+        return llmService.generateSummary(merged);
     }
 }

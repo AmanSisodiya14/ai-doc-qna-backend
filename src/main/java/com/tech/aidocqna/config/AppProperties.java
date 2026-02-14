@@ -27,8 +27,6 @@ public class AppProperties {
     private int chunkOverlapTokens = 100;
 
     private final Jwt jwt = new Jwt();
-    private final OpenAi openAi = new OpenAi();
-    private final LlamaIndex llamaIndex = new LlamaIndex();
     private final RateLimit rateLimit = new RateLimit();
 
     public String getStoragePath() {
@@ -67,15 +65,6 @@ public class AppProperties {
         return jwt;
     }
 
-    // OpenAI getter (Commented out - using LlamaIndex.ai instead)
-     public OpenAi getOpenAi() {
-         return openAi;
-     }
-    
-    public LlamaIndex getLlamaIndex() {
-        return llamaIndex;
-    }
-
     public RateLimit getRateLimit() {
         return rateLimit;
     }
@@ -99,113 +88,6 @@ public class AppProperties {
 
         public void setExpiration(Duration expiration) {
             this.expiration = expiration;
-        }
-    }
-
-    // OpenAI Configuration Class (Commented out - using LlamaIndex.ai instead)
-     public static class OpenAi {
-         @NotBlank
-         private String apiKey;
-         @NotBlank
-         private String baseUrl = "https://api.openai.com";
-         @NotBlank
-         private String embeddingModel = "text-embedding-3-small";
-         @NotBlank
-         private String chatModel = "gpt-4o-mini";
-         @NotBlank
-         private String whisperModel = "whisper-1";
-
-         public String getApiKey() {
-             return apiKey;
-         }
-
-         public void setApiKey(String apiKey) {
-             this.apiKey = apiKey;
-         }
-
-         public String getBaseUrl() {
-             return baseUrl;
-         }
-
-         public void setBaseUrl(String baseUrl) {
-             this.baseUrl = baseUrl;
-         }
-
-         public String getEmbeddingModel() {
-             return embeddingModel;
-         }
-
-         public void setEmbeddingModel(String embeddingModel) {
-             this.embeddingModel = embeddingModel;
-         }
-
-         public String getChatModel() {
-             return chatModel;
-         }
-
-         public void setChatModel(String chatModel) {
-             this.chatModel = chatModel;
-         }
-
-         public String getWhisperModel() {
-             return whisperModel;
-         }
-
-         public void setWhisperModel(String whisperModel) {
-             this.whisperModel = whisperModel;
-         }
-     }
-
-    public static class LlamaIndex {
-        @NotBlank
-        private String apiKey;
-        @NotBlank
-        private String baseUrl = "https://api.cloud.llamaindex.ai";
-        @NotBlank
-        private String embeddingModel = "text-embedding-3-small";
-        @NotBlank
-        private String chatModel = "gpt-4o-mini";
-        @NotBlank
-        private String whisperModel = "whisper-1";
-
-        public String getApiKey() {
-            return apiKey;
-        }
-
-        public void setApiKey(String apiKey) {
-            this.apiKey = apiKey;
-        }
-
-        public String getBaseUrl() {
-            return baseUrl;
-        }
-
-        public void setBaseUrl(String baseUrl) {
-            this.baseUrl = baseUrl;
-        }
-
-        public String getEmbeddingModel() {
-            return embeddingModel;
-        }
-
-        public void setEmbeddingModel(String embeddingModel) {
-            this.embeddingModel = embeddingModel;
-        }
-
-        public String getChatModel() {
-            return chatModel;
-        }
-
-        public void setChatModel(String chatModel) {
-            this.chatModel = chatModel;
-        }
-
-        public String getWhisperModel() {
-            return whisperModel;
-        }
-
-        public void setWhisperModel(String whisperModel) {
-            this.whisperModel = whisperModel;
         }
     }
 

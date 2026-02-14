@@ -10,7 +10,7 @@ public class ChatRequest {
     @NotNull
     private UUID fileId;
     @NotBlank
-    private String question;
+    private String message;
 
 
 }

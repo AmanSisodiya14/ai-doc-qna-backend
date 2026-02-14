@@ -9,22 +9,27 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Configuration
 public class WebClientConfig {
 
-    // OpenAI WebClient (Commented out - using LlamaIndex.ai instead)
-     @Bean
-     public WebClient openAiWebClient(AppProperties properties) {
-         return WebClient.builder()
-             .baseUrl(properties.getOpenAi().getBaseUrl())
-             .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + properties.getOpenAi().getApiKey())
-             .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-             .build();
-     }
+    @Bean("groqWebClient")
+    public WebClient groqWebClient(GroqProperties properties) {
+        return WebClient.builder()
+            .baseUrl(properties.getBaseUrl())
+            .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + properties.getApiKey())
+            .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+            .build();
+    }
 
-//    @Bean
-//    public WebClient llamaIndexWebClient(AppProperties properties) {
-//        return WebClient.builder()
-//            .baseUrl(properties.getLlamaIndex().getBaseUrl())
-//            .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + properties.getLlamaIndex().getApiKey())
-//            .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-//            .build();
-//    }
+    @Bean("embeddingWebClient")
+    public WebClient embeddingWebClient(EmbeddingProperties properties) {
+        return WebClient.builder()
+            .baseUrl(properties.getUrl())
+            .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+            .build();
+    }
+
+    @Bean("transcriptionWebClient")
+    public WebClient transcriptionWebClient(TranscriptionProperties properties) {
+        return WebClient.builder()
+            .baseUrl(properties.getUrl())
+            .build();
+    }
 }

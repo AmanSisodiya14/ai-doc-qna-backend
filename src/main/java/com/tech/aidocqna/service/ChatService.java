@@ -20,55 +20,36 @@ public class ChatService {
     private final FileService fileService;
     private final EmbeddingService embeddingService;
     private final VectorSearchService vectorSearchService;
-    // OpenAI Client Service (Commented out - using LlamaIndex.ai instead)
-     private final OpenAiClientService openAiClientService;
-//    private final LlamaIndexClientService llamaIndexClientService;
+    private final LLMService llmService;
     private final AuditService auditService;
 
-     public ChatService(
-         FileService fileService,
-         EmbeddingService embeddingService,
-         VectorSearchService vectorSearchService,
-         OpenAiClientService openAiClientService,
-         AuditService auditService
-     ) {
-         this.fileService = fileService;
-         this.embeddingService = embeddingService;
-         this.vectorSearchService = vectorSearchService;
-         this.openAiClientService = openAiClientService;
-         this.auditService = auditService;
-     }
-
-//    public ChatService(
-//        FileService fileService,
-//        EmbeddingService embeddingService,
-//        VectorSearchService vectorSearchService,
-//        LlamaIndexClientService llamaIndexClientService,
-//        AuditService auditService
-//    ) {
-//        this.fileService = fileService;
-//        this.embeddingService = embeddingService;
-//        this.vectorSearchService = vectorSearchService;
-//        this.llamaIndexClientService = llamaIndexClientService;
-//        this.auditService = auditService;
-//    }
+    public ChatService(
+        FileService fileService,
+        EmbeddingService embeddingService,
+        VectorSearchService vectorSearchService,
+        LLMService llmService,
+        AuditService auditService
+    ) {
+        this.fileService = fileService;
+        this.embeddingService = embeddingService;
+        this.vectorSearchService = vectorSearchService;
+        this.llmService = llmService;
+        this.auditService = auditService;
+    }
 
     @Cacheable(cacheNames = "faq", key = "#fileId.toString() + ':' + #question")
     public ChatResponse ask(String userEmail, UUID fileId, String question) {
         StoredFile file = fileService.getUserFile(fileId, userEmail);
-        List<Double> questionEmbedding = embeddingService.embedText(question);
+        List<Double> questionEmbedding = embeddingService.generateEmbedding(question);
         List<VectorStoreService.ScoredChunk> topChunks = vectorSearchService.searchTopK(file.getId(), questionEmbedding, 3);
         if (topChunks.isEmpty()) {
             throw new ResourceNotFoundException("No indexed chunks found for file");
         }
+
         String context = topChunks.stream()
             .map(scored -> scored.chunk().getContent())
             .collect(Collectors.joining("\n---\n"));
-
-        String systemPrompt = "You are a helpful assistant. Answer only from context. If unsure, say you do not know.";
-        String userPrompt = "Context:\n" + context + "\n\nQuestion:\n" + question;
-         String answer = openAiClientService.createChatCompletion(systemPrompt, userPrompt);
-//        String answer = llamaIndexClientService.createChatCompletion(systemPrompt, userPrompt);
+        String answer = llmService.generateAnswer(context, question);
 
         VectorStoreService.ScoredChunk best = topChunks.get(0);
         Chunk bestChunk = best.chunk();

@@ -5,7 +5,6 @@ import com.tech.aidocqna.dto.UserContext;
 import com.tech.aidocqna.dto.chat.ChatRequest;
 import com.tech.aidocqna.dto.chat.ChatResponse;
 import com.tech.aidocqna.service.ChatService;
-import com.tech.aidocqna.utils.SecurityUtils;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.MediaType;
@@ -35,7 +34,7 @@ public class ChatController {
     @PostMapping
     public ResponseEntity<ApiResponse<ChatResponse>> chat(@Valid @RequestBody ChatRequest request) {
         String email = UserContext.get().getEmail();
-        ChatResponse response = chatService.ask(email, request.getFileId(), request.getQuestion());
+        ChatResponse response = chatService.ask(email, request.getFileId(), request.getMessage());
         return ResponseEntity.ok(ApiResponse.success(response, "Operation successful"));
     }
 
