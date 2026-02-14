@@ -1,0 +1,76 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: aidocqna-app
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/aidocqna
+      SPRING_DATASOURCE_USERNAME: aidocqna
+      SPRING_DATASOURCE_PASSWORD: aidocqna
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      APP_STORAGE_PATH: /app/uploads
+      APP_JWT_SECRET: ${APP_JWT_SECRET:-change-this-jwt-secret-in-production}
+      GROQ_API_KEY: ${GROQ_API_KEY}
+      GROQ_MODEL: ${GROQ_MODEL:-llama3-70b-8192}
+      EMBEDDING_URL: http://embedding-service:8001
+      TRANSCRIPTION_URL: http://transcription-service:8002
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      embedding-service:
+        condition: service_started
+      transcription-service:
+        condition: service_started
+    volumes:
+      - uploads:/app/uploads
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: aidocqna-postgres
+    environment:
+      POSTGRES_DB: aidocqna
+      POSTGRES_USER: aidocqna
+      POSTGRES_PASSWORD: aidocqna
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aidocqna -d aidocqna"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: aidocqna-redis
+    ports:
+      - "6379:6379"
+
+  embedding-service:
+    build:
+      context: ./embedding-service
+      dockerfile: Dockerfile
+    container_name: embedding-service
+    ports:
+      - "8001:8001"
+
+  transcription-service:
+    build:
+      context: ./transcription-service
+      dockerfile: Dockerfile
+    container_name: transcription-service
+    ports:
+      - "8002:8002"
+
+volumes:
+  postgres_data:
+  uploads:
