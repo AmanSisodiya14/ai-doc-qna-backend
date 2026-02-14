@@ -37,10 +37,4 @@ public class ChatController {
         ChatResponse response = chatService.ask(email, request.getFileId(), request.getMessage());
         return ResponseEntity.ok(ApiResponse.success(response, "Operation successful"));
     }
-
-    @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter chatStream(@RequestParam Long fileId, @RequestParam @NotBlank String question) {
-        String email = UserContext.get().getEmail();
-        return chatService.streamAnswer(email, fileId, question);
-    }
 }

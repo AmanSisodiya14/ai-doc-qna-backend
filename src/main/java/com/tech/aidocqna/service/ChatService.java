@@ -58,19 +58,4 @@ public class ChatService {
         return new ChatResponse(answer, bestChunk.getStartTime(), confidence);
     }
 
-    public SseEmitter streamAnswer(String userEmail, Long fileId, String question) {
-        SseEmitter emitter = new SseEmitter(30000L);
-        CompletableFuture.runAsync(() -> {
-            try {
-                ChatResponse response = ask(userEmail, fileId, question);
-                emitter.send(SseEmitter.event().name("answer").data(response));
-                emitter.complete();
-            } catch (IOException ex) {
-                emitter.completeWithError(ex);
-            } catch (Exception ex) {
-                emitter.completeWithError(ex);
-            }
-        });
-        return emitter;
-    }
 }
