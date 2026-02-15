@@ -24,6 +24,7 @@ public class FilterConfig {
         registrationBean.setFilter(new JwtAuthenticationFilter(jwtService, userDetailsService));
         registrationBean.addUrlPatterns("/api/chat/*");
         registrationBean.addUrlPatterns("/api/files/*");
+        registrationBean.addUrlPatterns("/media/*");
         registrationBean.setOrder(1);
         return registrationBean;
     }
