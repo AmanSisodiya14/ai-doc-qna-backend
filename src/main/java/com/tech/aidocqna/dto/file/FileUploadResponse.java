@@ -12,6 +12,7 @@ public class FileUploadResponse {
     private String fileName;
     private String fileType;
     private String status;
+    private String storagePath;
 
 
 }

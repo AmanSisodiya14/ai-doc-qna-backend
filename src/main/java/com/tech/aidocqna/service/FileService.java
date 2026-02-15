@@ -1,5 +1,6 @@
 package com.tech.aidocqna.service;
 
+import com.tech.aidocqna.config.AppProperties;
 import com.tech.aidocqna.dto.file.FileMetadataResponse;
 import com.tech.aidocqna.dto.file.FileUploadResponse;
 import com.tech.aidocqna.dto.file.TimestampSearchResponse;
@@ -43,6 +44,7 @@ public class FileService {
     private final ChunkingService chunkingService;
     private final EmbeddingService embeddingService;
     private final VectorSearchService vectorSearchService;
+    private final AppProperties appProperties;
 
     public FileService(
         UserRepository userRepository,
@@ -53,7 +55,8 @@ public class FileService {
         TranscriptionService transcriptionService,
         ChunkingService chunkingService,
         EmbeddingService embeddingService,
-        VectorSearchService vectorSearchService
+        VectorSearchService vectorSearchService,
+        AppProperties appProperties
     ) {
         this.userRepository = userRepository;
         this.storedFileRepository = storedFileRepository;
@@ -64,6 +67,7 @@ public class FileService {
         this.chunkingService = chunkingService;
         this.embeddingService = embeddingService;
         this.vectorSearchService = vectorSearchService;
+        this.appProperties = appProperties;
 
     }
 
@@ -72,9 +76,12 @@ public class FileService {
         log.info("User {} is uploading a file", userEmail);
         User user = userRepository.findByEmail(userEmail)
             .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        Path storedPath = fileStorageService.store(multipartFile);
+
+        String storedFileName  = fileStorageService.store(multipartFile);
         String extension = fileStorageService.extensionOf(multipartFile.getOriginalFilename());
 
+        Path storedPath = Path.of(appProperties.getStoragePath())
+                .resolve(storedFileName);
         StoredFile file = new StoredFile();
         file.setUser(user);
         file.setFileName(multipartFile.getOriginalFilename());
@@ -98,7 +105,7 @@ public class FileService {
         vectorSearchService.indexFile(saved.getId(), chunks);
         log.info("Uploaded file {} with {} chunks", saved.getId(), chunks.size());
 
-        return new FileUploadResponse(saved.getId(), saved.getFileName(), saved.getFileType(), "PROCESSED");
+        return new FileUploadResponse(saved.getId(), saved.getFileName(), saved.getFileType(), "PROCESSED", storedFileName);
     }
 
     public Page<FileMetadataResponse> listFiles(String userEmail, int page, int size) {

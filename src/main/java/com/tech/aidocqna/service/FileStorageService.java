@@ -31,7 +31,7 @@ public class FileStorageService {
         Files.createDirectories(Path.of(appProperties.getStoragePath()));
     }
 
-    public Path store(MultipartFile multipartFile) {
+    public String store(MultipartFile multipartFile) {
         validateFile(multipartFile);
         try {
             String original = multipartFile.getOriginalFilename() == null ? "file" : multipartFile.getOriginalFilename();
@@ -40,7 +40,7 @@ public class FileStorageService {
             Path destination = Path.of(appProperties.getStoragePath()).resolve(safeName).normalize();
             Files.copy(multipartFile.getInputStream(), destination, StandardCopyOption.REPLACE_EXISTING);
             log.info("Stored file {}", destination);
-            return destination;
+            return safeName;
         } catch (IOException ex) {
             log.error("Unable to store uploaded file", ex);
             throw new BadRequestException("Unable to store uploaded file");
