@@ -1,0 +1,64 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: ai-doc-qna-backend
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/aidocqna}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:redis.com}
+      port: ${SPRING_DATA_REDIS_PORT:111}
+      password: ${SPRING_DATA_REDIS_PASSWORD:password}
+
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+app:
+  storage-path: ${APP_STORAGE_PATH:uploads}
+  max-file-size-bytes: ${APP_MAX_FILE_SIZE_BYTES:52428800}
+  chunk-size-tokens: ${APP_CHUNK_SIZE_TOKENS:700}
+  chunk-overlap-tokens: ${APP_CHUNK_OVERLAP_TOKENS:100}
+  jwt:
+    secret: ${APP_JWT_SECRET:key}
+    expiration: ${APP_JWT_EXPIRATION:PT24H}
+  rate-limit:
+    requests-per-minute: ${APP_RATE_LIMIT_REQUESTS_PER_MINUTE:60}
+  groq:
+    base-url: ${GROQ_BASE_URL:https://api.groq.com/openai/v1}
+    api-key: ${GROQ_API_KEY:key}
+    model: ${GROQ_MODEL:llama-3.3-70b-versatile}
+
+  embedding:
+    url: ${EMBEDDING_URL:http://localhost:8001}
+  #  url: ${EMBEDDING_URL:http://embedding-service:8001}
+
+  transcription:
+    url: ${TRANSCRIPTION_URL:http://localhost:8002}
+  #  url: ${TRANSCRIPTION_URL:http://transcription-service:8002}
+
+logging:
+  level:
+    root: INFO
+    com.tech.aidocqna: INFO
+file:
+  upload-dir: uploads
