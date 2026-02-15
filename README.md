@@ -135,10 +135,10 @@ The backend API will be available at: **http://localhost:8080**
 | Variable                     | Description       | Default                                     | Required      |
 | ---------------------------- | ----------------- | ------------------------------------------- | ------------- |
 | `GROQ_API_KEY`               | Groq API Key      | -                                           | **Yes**       |
-| `SPRING_DATASOURCE_URL`      | DB Connection URL | `jdbc:postgresql://localhost:5432/aidocqna` | No            |
-| `SPRING_DATASOURCE_USERNAME` | DB Username       | `aidocqna`                                  | No            |
-| `SPRING_DATASOURCE_PASSWORD` | DB Password       | `aidocqna`                                  | No            |
-| `SPRING_DATA_REDIS_HOST`     | Redis Host        | `localhost`                                 | No            |
+| `SPRING_DATASOURCE_URL`      | DB Connection URL | `jdbc:postgresql://localhost:5432/aidocqna` | **Yes**       |
+| `SPRING_DATASOURCE_USERNAME` | DB Username       | `aidocqna`                                  | **Yes**       |
+| `SPRING_DATASOURCE_PASSWORD` | DB Password       | `aidocqna`                                  | **Yes**       |
+| `SPRING_DATA_REDIS_HOST`     | Redis Host        | `localhost`                                 | **Yes**       |
 | `APP_JWT_SECRET`             | JWT Secret Key    | `dev-secret...`                             | **Prod Only** |
 
 See `../docs/environment-variables.md` for the full list.

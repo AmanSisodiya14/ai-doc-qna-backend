@@ -12,17 +12,17 @@
 
 | Variable                     | Description                    | Default                                     | Required |
 | ---------------------------- | ------------------------------ | ------------------------------------------- | -------- |
-| `SPRING_DATASOURCE_URL`      | PostgreSQL JDBC connection URL | `jdbc:postgresql://localhost:5432/aidocqna` | No       |
-| `SPRING_DATASOURCE_USERNAME` | PostgreSQL username            | `aidocqna`                                  | No       |
-| `SPRING_DATASOURCE_PASSWORD` | PostgreSQL password            | `aidocqna`                                  | No       |
+| `SPRING_DATASOURCE_URL`      | PostgreSQL JDBC connection URL | `jdbc:postgresql://localhost:5432/aidocqna` | yes      |
+| `SPRING_DATASOURCE_USERNAME` | PostgreSQL username            | `aidocqna`                                  | yes      |
+| `SPRING_DATASOURCE_PASSWORD` | PostgreSQL password            | `aidocqna`                                  | yes      |
 
 ### Redis Configuration
 
 | Variable                     | Description                  | Default     | Required |
 | ---------------------------- | ---------------------------- | ----------- | -------- |
-| `SPRING_DATA_REDIS_HOST`     | Redis server hostname        | `localhost` | No       |
-| `SPRING_DATA_REDIS_PORT`     | Redis server port            | `6379`      | No       |
-| `SPRING_DATA_REDIS_PASSWORD` | Redis password (if required) | (empty)     | No       |
+| `SPRING_DATA_REDIS_HOST`     | Redis server hostname        | `localhost` | yes      |
+| `SPRING_DATA_REDIS_PORT`     | Redis server port            | `6379`      | yes      |
+| `SPRING_DATA_REDIS_PASSWORD` | Redis password (if required) | (empty)     | yes      |
 
 ### Security Configuration
 
