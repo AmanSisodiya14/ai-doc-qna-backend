@@ -7,12 +7,8 @@ import com.tech.aidocqna.model.StoredFile;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Service
@@ -54,9 +50,11 @@ public class ChatService {
 
         VectorStoreService.ScoredChunk best = topChunks.get(0);
         Chunk bestChunk = best.chunk();
-        double confidence = Math.max(0.0, Math.min(1.0, best.score()));
+        boolean isPdf = "pdf".equalsIgnoreCase(file.getFileType());
+        Long startTime = isPdf ? null : bestChunk.getStartTime();
+        Long endTime = isPdf ? null : bestChunk.getEndTime();
         log.info("CHAT_QUESTION '{}' fileId is '{}'", userEmail, fileId);
-        return new ChatResponse(answer, bestChunk.getStartTime(), confidence);
+        return new ChatResponse(answer, startTime, endTime);
     }
 
 }

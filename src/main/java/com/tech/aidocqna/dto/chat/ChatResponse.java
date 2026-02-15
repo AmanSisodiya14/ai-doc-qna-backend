@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ChatResponse {
     private String answer;
-    private Long timestamp;
-    private double confidence;
+    private Long startTime;
+    private Long endTime;
 
 
 }

@@ -3,17 +3,20 @@ package com.tech.aidocqna.service;
 import com.tech.aidocqna.config.AppProperties;
 import com.tech.aidocqna.dto.internal.ChunkPayload;
 import com.tech.aidocqna.dto.internal.TranscriptionSegment;
-import com.tech.aidocqna.utils.TokenEstimator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.StringJoiner;
 
 @Service
 @Slf4j
 public class ChunkingService {
+
+    private static final long MIN_MEDIA_WINDOW_SECONDS = 20L;
+    private static final long MAX_MEDIA_WINDOW_SECONDS = 30L;
 
     private final AppProperties appProperties;
 
@@ -54,35 +57,54 @@ public class ChunkingService {
         if (segments == null || segments.isEmpty()) {
             return List.of();
         }
+
         List<ChunkPayload> chunks = new ArrayList<>();
-        int maxTokens = appProperties.getChunkSizeTokens();
 
         StringBuilder builder = new StringBuilder();
         Long currentStart = null;
         Long currentEnd = null;
-        int currentTokens = 0;
+        long previousNormalizedEnd = 0L;
 
-        for (TranscriptionSegment segment : segments) {
+        List<TranscriptionSegment> orderedSegments = segments.stream()
+            .sorted(Comparator.comparingLong(TranscriptionSegment::getStart))
+            .toList();
+
+        for (TranscriptionSegment segment : orderedSegments) {
             String segmentText = segment.getText() == null ? "" : segment.getText().trim();
             if (segmentText.isBlank()) {
                 continue;
             }
-            int segTokens = TokenEstimator.estimateTokens(segmentText);
+
+            long rawStart = Math.max(0L, segment.getStart());
+            long rawEnd = Math.max(rawStart, segment.getEnd());
+            long normalizedStart = Math.max(rawStart, previousNormalizedEnd);
+            long normalizedEnd = Math.max(normalizedStart, rawEnd);
+            previousNormalizedEnd = normalizedEnd;
+
             if (currentStart == null) {
-                currentStart = segment.getStart();
+                currentStart = normalizedStart;
+                currentEnd = normalizedEnd;
+                builder.append(segmentText);
+                continue;
             }
-            if (currentTokens + segTokens > maxTokens && currentTokens > 0) {
+
+            long currentDuration = Math.max(0L, currentEnd - currentStart);
+            long candidateEnd = Math.max(currentEnd, normalizedEnd);
+            long candidateDuration = Math.max(0L, candidateEnd - currentStart);
+
+            boolean windowWouldExceedMax = candidateDuration > MAX_MEDIA_WINDOW_SECONDS;
+            boolean windowIsReadyToFlush = currentDuration >= MIN_MEDIA_WINDOW_SECONDS;
+
+            if (windowWouldExceedMax && windowIsReadyToFlush) {
                 chunks.add(new ChunkPayload(builder.toString().trim(), currentStart, currentEnd));
-                builder = new StringBuilder();
-                currentStart = segment.getStart();
-                currentTokens = 0;
+                builder = new StringBuilder(segmentText);
+                currentStart = normalizedStart;
+                currentEnd = normalizedEnd;
+                continue;
             }
-            if (builder.length() > 0) {
-                builder.append(' ');
-            }
-            builder.append(segmentText);
-            currentTokens += segTokens;
-            currentEnd = segment.getEnd();
+
+            builder.append(' ').append(segmentText);
+            currentEnd = candidateEnd;
         }
 
         if (!builder.toString().isBlank()) {
