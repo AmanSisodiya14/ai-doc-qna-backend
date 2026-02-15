@@ -32,6 +32,8 @@ build/
 ### VS Code ###
 .vscode/
 
+/uploads/
+
 ### Python ###
 __pycache__/
 *.py[cod]
@@ -46,3 +48,6 @@ __pycache__/
 venv/
 env/
 ENV/
+
+docker-compose.yml
+Dockerfile
