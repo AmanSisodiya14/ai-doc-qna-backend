@@ -8,7 +8,6 @@ import com.tech.aidocqna.dto.file.FileUploadResponse;
 import com.tech.aidocqna.dto.file.TimestampSearchResponse;
 import com.tech.aidocqna.service.FileService;
 import com.tech.aidocqna.service.SummaryService;
-import com.tech.aidocqna.utils.SecurityUtils;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +22,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
-import java.util.UUID;
 
 @Validated
 @RestController

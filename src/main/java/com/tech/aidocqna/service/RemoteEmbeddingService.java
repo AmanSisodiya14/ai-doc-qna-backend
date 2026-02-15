@@ -64,4 +64,50 @@ public class RemoteEmbeddingService implements EmbeddingService {
             throw new ExternalServiceException("Failed to call embedding service", ex);
         }
     }
+
+    @Override
+    @Cacheable(cacheNames = "embeddings", key = "#texts")
+    public List<List<Double>> generateEmbeddings(List<String> texts) {
+    log.info("Generating embeddings for {} texts", texts.size());
+        if (texts == null || texts.isEmpty()) {
+            throw new BadRequestException("Texts must not be empty");
+        }
+
+        try {
+
+            Map<String, Object> request = Map.of("texts", texts);
+
+            Map<String, Object> response = embeddingWebClient.post()
+                    .uri("/embed-batch")
+                    .bodyValue(request)
+                    .retrieve()
+                    .bodyToMono(Map.class)
+                    .block();
+
+            if (response == null || response.get("embeddings") == null) {
+                throw new ExternalServiceException("Empty embedding response");
+            }
+
+            List<List<Number>> raw =
+                    (List<List<Number>>) response.get("embeddings");
+
+            log.info("Generated embeddings for {} texts", texts.size());
+            return raw.stream()
+                    .map(list -> list.stream()
+                            .map(Number::doubleValue)
+                            .toList())
+                    .toList();
+
+        } catch (WebClientResponseException ex) {
+            log.error("Embedding service returned status {}", ex.getStatusCode().value(), ex);
+            throw new ExternalServiceException(
+                    "Embedding service error: " + ex.getStatusCode().value(), ex);
+
+        } catch (Exception ex) {
+            log.error("Failed to call embedding service", ex);
+            throw new ExternalServiceException(
+                    "Failed to call embedding service", ex);
+        }
+    }
+
 }

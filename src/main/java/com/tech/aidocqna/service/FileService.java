@@ -140,21 +140,32 @@ public class FileService {
     }
 
     private List<Chunk> persistChunks(StoredFile file, List<ChunkPayload> chunkPayloads) {
+
         log.info("Persisting {} chunks for file {}", chunkPayloads.size(), file.getId());
+
+        List<String> texts = chunkPayloads.stream()
+                .map(ChunkPayload::getContent)
+                .toList();
+
+        List<List<Double>> embeddings = embeddingService.generateEmbeddings(texts);
+
         List<Chunk> chunks = new ArrayList<>();
+
         for (int i = 0; i < chunkPayloads.size(); i++) {
             ChunkPayload payload = chunkPayloads.get(i);
+
             Chunk chunk = new Chunk();
             chunk.setFile(file);
             chunk.setContent(payload.getContent());
             chunk.setStartTime(payload.getStartTime());
             chunk.setEndTime(payload.getEndTime());
             chunk.setChunkOrder(i);
-            chunk.setEmbedding(embeddingService.generateEmbedding(payload.getContent()));
+            chunk.setEmbedding(embeddings.get(i));
+
             chunks.add(chunk);
         }
-        log.info("Persisted {} chunks for file {}", chunks.size(), file.getId());
 
         return chunkRepository.saveAll(chunks);
     }
+
 }
